@@ -1,0 +1,8 @@
+{
+  "short_name": "tic-tac-toe-game_React.js",
+  "name": "Tic Tac Toe Game using React.js Library",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
