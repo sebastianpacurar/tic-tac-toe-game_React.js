@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import ReactDOM from "react-dom";
 import "./style.css";
 
@@ -26,59 +26,52 @@ const Square = props => {
 
 
 // The Board component
-class Board extends React.Component {
-    constructor(props) {
-        super(props);
+const Board = () => {
 
-        // 2 props: one for square, one to check if X or 0 is next
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true,
+    // the getter and the setter. setter will be used to update the getter
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    const [xIsNext, setXisNext] = useState(true);
+
+
+    // mark the square with X or O
+    const markSquare = index => {
+
+        // if there calculateWinner returns false continue to mark squares
+        if (!calculateWinner(squares)) {
+
+            // if xIsNext is true then use X to mark the squares
+            squares[index] = xIsNext ? "X" : "0";
+
+            // set State for squares; and who is next
+            setSquares(squares);
+            setXisNext(!xIsNext);
         }
-    }
+    };
 
-    // the function to render the squares
-    drawSquare(index) {
+    // resets the entire array to null, X will be the first to go again
+    const resetGame = () => {
+
+        //set state for squares to be null again; and make X be the first to go
+        setSquares(Array(9).fill(null));
+        setXisNext(true);
+    };
+
+    // the function which renders the squares.
+    const drawSquare = index => {
         return (
             <Square
                 className={"square"}
-                value={this.state.squares[index]}
-                clickSquare={() => this.markSquare(index)}
-                disabled={this.state.squares[index] !== null}
+                value={squares[index]}
+                clickSquare={() => markSquare(index)}
+                disabled={squares[index] !== null}
             />
         );
-    }
-
-    // resets the entire array to null, X will be the first to go again
-    resetGame = () => {
-        this.setState({
-            squares: Array(9).fill(null),
-            xIsNext: true
-        })
     };
 
-    // mark the square with X or O
-    markSquare = index => {
-
-        // if there calculateWinner returns false continue to mark squares
-        if (!calculateWinner(this.state.squares)) {
-
-            // slice the array
-            const squares = this.state.squares.slice();
-            squares[index] = this.state.xIsNext ? "X" : "0";
-
-            this.setState({
-                squares: squares,
-                xIsNext: !this.state.xIsNext,
-            })
-        }
-    };
-
-
-    render() {
+    const getWinner = () => {
 
         // the winner is evaluated based on three items of the same kind in a row
-        const winner = calculateWinner(this.state.squares);
+        const winner = calculateWinner(squares);
 
         let status = "";
 
@@ -88,47 +81,50 @@ class Board extends React.Component {
         }
 
         // if there is a draw it means nobody won
-        else if (!winner && !checkNullSquares(this.state.squares)) {
+        else if (!winner && !checkNullSquares(squares)) {
             status = "Draw"
         }
 
         // next player will be set upon the boolean value of xIsNext state
         else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+            status = 'Next player: ' + (xIsNext ? 'X' : 'O');
         }
-        return (
-            <div>
-                <div className="status">{status}</div>
-                <div>
-                    {this.drawSquare(0)}
-                    {this.drawSquare(1)}
-                    {this.drawSquare(2)}
-                </div>
-                <div>
-                    {this.drawSquare(3)}
-                    {this.drawSquare(4)}
-                    {this.drawSquare(5)}
-                </div>
-                <div>
-                    {this.drawSquare(6)}
-                    {this.drawSquare(7)}
-                    {this.drawSquare(8)}
-                </div>
-                <ResetButton
-                    clickReset={() => this.resetGame()}
-                />
-            </div>
-        );
+
+        return status;
     }
+
+
+    return (
+        <div>
+            <div className="status">{getWinner()}</div>
+            <div>
+                {drawSquare(0)}
+                {drawSquare(1)}
+                {drawSquare(2)}
+            </div>
+            <div>
+                {drawSquare(3)}
+                {drawSquare(4)}
+                {drawSquare(5)}
+            </div>
+            <div>
+                {drawSquare(6)}
+                {drawSquare(7)}
+                {drawSquare(8)}
+            </div>
+            <ResetButton
+                clickReset={() => resetGame()}
+            />
+        </div>
+    );
+
 }
 
 // The game Component
 const Game = () => {
     return (
         <div className="game">
-            <div className="game-board">
-                <Board/>
-            </div>
+            <Board/>
         </div>
     );
 }
@@ -145,7 +141,7 @@ function checkNullSquares(squares) {
     }
 }
 
-function calculateWinner(squares) {
+const calculateWinner = squares => {
 
     // these are the actual lines which can match a win on horizontal, vertical or diagonal
     const lines = [
@@ -174,6 +170,3 @@ function calculateWinner(squares) {
 
 
 ReactDOM.render(<Game/>, document.getElementById('root'));
-
-
-
